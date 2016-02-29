@@ -22,8 +22,12 @@ char *g_battery_info[] = { ";", "<", "=", ">", "?" }; // charging, empty, full, 
 int g_battery_status = -1;
 
 UG_WINDOW g_home_window;
-//const char *g_entry_name[7] = { "sesnor", "action", "ifttt", "setting", "call", "sms", "12:00" };
-const char *g_entry_name[7] = { "3", "6", "7", "2", "1", "5", "12:00" }; // icon font
+//const char *g_entry_name[7] = { "call", "setting", "sms", "action", "ifttt", "home2", "12:00" };
+const char *g_entry_name[7] = { "1", "2", "5", "6", "7", ">", "12:00" }; // icon font
+
+UG_WINDOW g_home2_window;
+//const char *g_entry_name2[7] = { "home", "sesnor", "GPS", "", "", "", "12:00" };
+const char *g_entry_name2[7] = { "<", "3", "GPS", "", "", "", "12:00" }; // icon font
 
 UG_WINDOW g_time_window;
 
@@ -91,6 +95,7 @@ void time_update_callback(void)
             g_system_time_string[0] = '0' + ((current_time.year / 1000) % 10);
 
             UG_ButtonSetText(&g_home_window, 6, g_system_time_string);
+            UG_ButtonSetText(&g_home2_window, 6, g_system_time_string);
         }
     }
 
@@ -111,8 +116,9 @@ void time_update_callback(void)
 
     if (battery_status != g_battery_status) {
         g_battery_status = battery_status;
-        UG_ButtonSetText(&g_home_window, 7, g_battery_info[battery_status]);
     }
+    UG_ButtonSetText(&g_home_window, 7, g_battery_info[battery_status]);
+    UG_ButtonSetText(&g_home2_window, 7, g_battery_info[battery_status]);
 }
 
 static void home_window_callback(UG_MESSAGE *msg)
@@ -121,27 +127,26 @@ static void home_window_callback(UG_MESSAGE *msg)
     if (msg->type == MSG_TYPE_OBJECT) {
         if (msg->id == OBJ_TYPE_BUTTON && msg->event == OBJ_EVENT_RELEASED) {
             switch (msg->sub_id) {
-                case 0: // sensor
-                    UG_WindowShow(&g_sensor_list_window);
-                    break;
-                case 1: // actuator
-                    UG_WindowShow(&g_actuator_list_window);
-                    break;
-                case 2: // ifttt
-                    UG_WindowShow(&g_ifttt_list_window);
-                    break;
-                case 3:
-                    UG_WindowShow(&g_settings_window);
-                    break;
-                case 4: // call
-                    call_window_show();
-                    break;
-                case 5: // sms
-                    sms_window_show();
-                    break;
-                case 6: // time
-                    time_window_show();
-                    break;
+				case 0: // call
+					call_window_show();
+					break;
+				case 1: // settings
+					UG_WindowShow(&g_settings_window);
+					break;
+				case 2: // sms
+					sms_window_show();
+					break;
+				case 3: // actuator
+					UG_WindowShow(&g_actuator_list_window);
+					break;
+				case 4: // ifttt
+					UG_WindowShow(&g_ifttt_list_window);
+					break;
+				case 5: // home2
+					UG_WindowShow(&g_home2_window);
+					break;
+				case 6: // time
+					time_window_show();
             }
         }
     }
@@ -151,7 +156,7 @@ static void home_window_create(void)
 {
     static UG_BUTTON buttons[11];
     static UG_OBJECT objects[11];
-    uint32_t colors[] = {0x00865a, 0x4edc4, 0xc7f464, 0xff6b6b, 0xc44d58, 0xf7cf10};
+    uint32_t colors[] = {0xc44d58, 0xff6b6b, 0xf7cf10, 0x4edc4, 0xc7f464, C_BLACK};
     int i, j;
     int index;
 
@@ -164,7 +169,11 @@ static void home_window_create(void)
         for (j = 0; j < 3; j++) {
             UG_ButtonCreate(&g_home_window, buttons + index, index, 80 * j,
                     80 * i + 80, 80 * (j + 1) - 1, 80 * i + 160 - 1);
-            UG_ButtonSetFont(&g_home_window, index, &FONT_ICON48);
+            if ((i == 1) && (j == 2)) {
+                UG_ButtonSetFont(&g_home_window, index, &FONT_SIZE40);
+            } else {
+				UG_ButtonSetFont(&g_home_window, index, &FONT_ICON48);
+            }
             UG_ButtonSetText(&g_home_window, index, g_entry_name[index]);
             UG_ButtonSetBackColor(&g_home_window, index, colors[index]);
             UG_ButtonSetStyle(&g_home_window, index,
@@ -195,7 +204,7 @@ static void home_window_create(void)
     UG_ButtonSetFont(&g_home_window, index, &FONT_SIZE20);
     UG_ButtonSetStyle(&g_home_window, index,
             BTN_STYLE_2D | BTN_STYLE_NO_BORDERS);
-    UG_ButtonSetBackColor(&g_home_window, index, C_PURPLE);
+    UG_ButtonSetBackColor(&g_home_window, index, C_PINK);
 
     if (!vm_gsm_sim_has_card()) {
         UG_ButtonSetText(&g_home_window, index, "no sim");
@@ -213,7 +222,131 @@ static void home_window_create(void)
         UG_ButtonSetText(&g_home_window, index, NULL);
     }
     time_update_callback();
+}
 
+static void home2_window_callback(UG_MESSAGE *msg)
+{
+    /* output log to monitor or catcher */
+    if (msg->type == MSG_TYPE_OBJECT) {
+        if (msg->id == OBJ_TYPE_BUTTON && msg->event == OBJ_EVENT_RELEASED) {
+            switch (msg->sub_id) {
+                case 0: // home
+                    UG_WindowShow(&g_home_window);
+                    break;
+                case 1: // sensors
+                    UG_WindowShow(&g_sensor_list_window);
+                    break;
+                case 2: // GPS
+                    // UG_WindowShow(&g_gps_list_window);
+                    break;
+                case 3: // unused
+                    break;
+                case 4: // unused
+                    break;
+                case 5:	// unused
+                	break;
+                case 6: // time
+                    time_window_show();
+                    break;
+            }
+        }
+    }
+}
+
+static void home2_window_create(void)
+{
+    static UG_BUTTON buttons[11];
+    static UG_OBJECT objects[11];
+    uint32_t colors[] = {C_BLACK, 0x00865a, C_SKY_BLUE, C_BLACK, C_BLACK, C_BLACK};
+    int i, j;
+    int index;
+
+    UG_WindowCreate(&g_home2_window, objects, sizeof(objects) / sizeof(*objects),
+            home2_window_callback);
+    UG_WindowSetStyle(&g_home2_window, WND_STYLE_2D);
+
+    index = 0;
+    for (i = 0; i < 2; i++) {
+        for (j = 0; j < 3; j++) {
+            UG_ButtonCreate(&g_home2_window, buttons + index, index, 80 * j,
+                    80 * i + 80, 80 * (j + 1) - 1, 80 * i + 160 - 1);
+            switch (i) {
+				case 0:		// top row of buttons
+					switch (j) {
+					case 0:
+						UG_ButtonSetFont(&g_home2_window, index, &FONT_SIZE40);
+						break;
+					case 1:
+						UG_ButtonSetFont(&g_home2_window, index, &FONT_ICON48);
+						break;
+					case 2:
+						UG_ButtonSetFont(&g_home2_window, index, &FONT_SIZE20);
+						break;
+					}
+					break;
+
+				case 1:		// bottom row of buttons
+					switch (j) {
+					case 0:
+						UG_ButtonSetFont(&g_home2_window, index, &FONT_ICON48);
+						break;
+					case 1:
+						UG_ButtonSetFont(&g_home2_window, index, &FONT_ICON48);
+						break;
+					case 2:
+						UG_ButtonSetFont(&g_home2_window, index, &FONT_ICON48);
+						break;
+					}
+					break;
+            }
+			UG_ButtonSetText(&g_home2_window, index, g_entry_name2[index]);
+            UG_ButtonSetBackColor(&g_home2_window, index, colors[index]);
+            UG_ButtonSetStyle(&g_home2_window, index,
+                    BTN_STYLE_2D | BTN_STYLE_TOGGLE_COLORS
+                            | BTN_STYLE_NO_BORDERS);
+
+            index++;
+        }
+    }
+
+    UG_ButtonCreate(&g_home2_window, buttons + index, index, 40, 24, 199, 79);
+    UG_ButtonSetFont(&g_home2_window, index, &FONT_SIZE20);
+    UG_ButtonSetStyle(&g_home2_window, index,
+            BTN_STYLE_2D | BTN_STYLE_NO_BORDERS);
+    UG_ButtonSetBackColor(&g_home2_window, index, 0);
+
+    index++;
+
+    UG_ButtonCreate(&g_home2_window, buttons + index, index, 200, 0, 239, 26);
+    UG_ButtonSetFont(&g_home2_window, index, &FONT_ICON24);
+    UG_ButtonSetStyle(&g_home2_window, index,
+            BTN_STYLE_2D | BTN_STYLE_NO_BORDERS);
+    UG_ButtonSetBackColor(&g_home2_window, index, 0);
+
+    index++;
+
+    UG_ButtonCreate(&g_home2_window, buttons + index, index, 0, 0, 70, 26);
+    UG_ButtonSetFont(&g_home2_window, index, &FONT_SIZE20);
+    UG_ButtonSetStyle(&g_home2_window, index,
+            BTN_STYLE_2D | BTN_STYLE_NO_BORDERS);
+    UG_ButtonSetBackColor(&g_home2_window, index, C_PINK);
+
+    if (!vm_gsm_sim_has_card()) {
+        UG_ButtonSetText(&g_home2_window, index, "no sim");
+    }
+
+    index++;
+
+    if (vm_gsm_sim_has_card()) {
+        UG_ButtonCreate(&g_home2_window, buttons + index, index, 0, 0, 32, 26);
+        UG_ButtonSetFont(&g_home2_window, index, &FONT_ICON24);
+        UG_ButtonSetStyle(&g_home2_window, index,
+                BTN_STYLE_2D | BTN_STYLE_NO_BORDERS);
+        UG_ButtonSetBackColor(&g_home2_window, index, 0);
+
+        UG_ButtonSetText(&g_home2_window, index, NULL);
+    }
+    time_update_callback();
 }
 
 void time_window_increase()
@@ -438,7 +571,7 @@ static void time_window_callback(UG_MESSAGE *msg)
             switch (msg->sub_id) {
                 case 0: // return
                     vm_time_set_date_time(&g_time_set);
-                    UG_WindowShow(&g_home_window);
+                    UG_WindowShow(UG_GetLastWindow());
                     break;
                 case 1: // +
                     time_window_increase();
@@ -620,7 +753,7 @@ void sensor_list_window_callback(UG_MESSAGE *msg)
                 case 0:
                     break;
                 case 1: // back
-                    UG_WindowShow(&g_home_window);
+                    UG_WindowShow(UG_GetLastWindow());
                     break;
                 case 2: // down
                 {
@@ -790,6 +923,7 @@ void actuator_list_window_create(void)
 void windows_create(void)
 {
     home_window_create();
+    home2_window_create();
     time_window_create();
     call_window_create();
     sms_window_create();

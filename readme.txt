@@ -1,6 +1,12 @@
 ## Scriven42's Modified RePhone Kit Create Source Code
 
 -Added a keyboard to type new messages, not just send pre-written canned messages.
+-Changed the "no sim" background to C_PINK, as a marker.
+-Added a second home screen, and rearranged the icon layout. New layout is:
+	Home:	Call, Settings, SMS
+		Actions, ITTT, Home2
+	Home2: Home, Sensors, GPS (label only, does nothing)
+		  All Unused
 
 ---
 
