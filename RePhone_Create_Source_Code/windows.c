@@ -26,12 +26,13 @@ UG_WINDOW g_home_window;
 const char *g_entry_name[7] = { "1", "2", "5", "6", "7", ">", "12:00" }; // icon font
 
 UG_WINDOW g_home2_window;
-//const char *g_entry_name2[7] = { "home", "sesnor", "GPS", "", "", "", "12:00" };
-const char *g_entry_name2[7] = { "<", "3", "GPS", "", "", "", "12:00" }; // icon font
+//const char *g_entry_name2[7] = { "home", "sesnor", "GPS", "Info", "", "", "12:00" };
+const char *g_entry_name2[7] = { "<", "3", "GPS", "4", "", "", "12:00" }; // icon font
 
 UG_WINDOW g_time_window;
 
 
+UG_WINDOW g_info_window;
 
 UG_WINDOW g_sensor_list_window;
 char g_sensor_data_strings[4][32] = { 0, };
@@ -48,6 +49,7 @@ extern UG_WINDOW g_ifttt_list_window;
 
 extern UG_WINDOW g_led_matrix_window;
 
+extern char* g_version;
 extern void lcd_backlight_level(VMUINT32 ulValue);
 extern char *itoa(int num, char* str, int radix);
 
@@ -95,7 +97,7 @@ void time_update_callback(void)
             g_system_time_string[0] = '0' + ((current_time.year / 1000) % 10);
 
             UG_ButtonSetText(&g_home_window, 6, g_system_time_string);
-            UG_ButtonSetText(&g_home2_window, 6, g_system_time_string);
+            //UG_ButtonSetText(&g_home2_window, 6, g_system_time_string);
         }
     }
 
@@ -118,7 +120,7 @@ void time_update_callback(void)
         g_battery_status = battery_status;
     }
     UG_ButtonSetText(&g_home_window, 7, g_battery_info[battery_status]);
-    UG_ButtonSetText(&g_home2_window, 7, g_battery_info[battery_status]);
+    //UG_ButtonSetText(&g_home2_window, 7, g_battery_info[battery_status]);
 }
 
 static void home_window_callback(UG_MESSAGE *msg)
@@ -226,7 +228,7 @@ static void home_window_create(void)
 
 static void home2_window_callback(UG_MESSAGE *msg)
 {
-    /* output log to monitor or catcher */
+    // output log to monitor or catcher
     if (msg->type == MSG_TYPE_OBJECT) {
         if (msg->id == OBJ_TYPE_BUTTON && msg->event == OBJ_EVENT_RELEASED) {
             switch (msg->sub_id) {
@@ -239,7 +241,8 @@ static void home2_window_callback(UG_MESSAGE *msg)
                 case 2: // GPS
                     // UG_WindowShow(&g_gps_list_window);
                     break;
-                case 3: // unused
+                case 3: // Info
+                    UG_WindowShow(&g_info_window);
                     break;
                 case 4: // unused
                     break;
@@ -346,7 +349,7 @@ static void home2_window_create(void)
 
         UG_ButtonSetText(&g_home2_window, index, NULL);
     }
-    time_update_callback();
+    // time_update_callback();
 }
 
 void time_window_increase()
@@ -920,6 +923,90 @@ void actuator_list_window_create(void)
     actuator_list_window_update();
 }
 
+void info_window_callback(UG_MESSAGE *msg)
+{
+    if (msg->type == MSG_TYPE_OBJECT) {
+        if (msg->id == OBJ_TYPE_BUTTON && msg->event == OBJ_EVENT_RELEASED) {
+            switch (msg->sub_id) {
+                case 0:
+                    break;
+                case 1: // back
+                    UG_WindowShow(UG_GetLastWindow());
+                    break;
+                case 2: // down
+                {
+/*
+                    int sensor_number = sensor_get_number() - SENSOR_HIDDEN_NUMBER;
+                    if (g_sensor_first_visible < (sensor_number - 1)) {
+                        g_sensor_first_visible++;
+                        sensor_list_window_update();
+                    }
+*/
+                    break;
+                }
+                case 3: // up
+/*
+                    if (g_sensor_first_visible > 0) {
+                        g_sensor_first_visible--;
+                        sensor_list_window_update();
+                    }
+*/
+                    break;
+            }
+        }
+    }
+}
+
+void info_window_create(void)
+{
+    static UG_BUTTON buttons[13];
+    static UG_OBJECT objects[13];
+    char *actions[] = { "1", "4", "3" };
+    int i = 0;
+
+    UG_WindowCreate(&g_info_window, objects,
+            sizeof(objects) / sizeof(*objects), info_window_callback);
+    UG_WindowSetStyle(&g_info_window, WND_STYLE_2D);
+
+    UG_ButtonCreate(&g_info_window, buttons, BTN_ID_0, 0, 0, 239, 39);
+    UG_ButtonSetFont(&g_info_window, BTN_ID_0, &FONT_SIZE20);
+    UG_ButtonSetText(&g_info_window, BTN_ID_0, "RePhone Kit Create");
+    UG_ButtonSetStyle(&g_info_window, BTN_ID_0,
+            BTN_STYLE_2D | BTN_STYLE_NO_BORDERS);
+    UG_ButtonSetBackColor(&g_info_window, BTN_ID_0, 0x000000);
+
+    for (i = 0; i < 3; i++) {
+        UG_ButtonCreate(&g_info_window, buttons + 1 + i, i + 1, 80 * i,
+                200, 80 * i + 80 - 1, 239);
+        UG_ButtonSetFont(&g_info_window, i + 1, &FONT_ICON24);
+        UG_ButtonSetText(&g_info_window, i + 1, actions[i]);
+        UG_ButtonSetStyle(&g_info_window, i + 1,
+                BTN_STYLE_2D | BTN_STYLE_TOGGLE_COLORS | BTN_STYLE_NO_BORDERS);
+
+    }
+
+    for (i = 0; i < 4; i++) {
+        int offset = i + 4;
+        UG_ButtonCreate(&g_info_window, buttons + offset, offset, 0,
+                40 * i + 40, 239, 40 * (i + 1) + 40 - 1);
+        UG_ButtonSetFont(&g_info_window, offset, &FONT_SIZE20);
+        UG_ButtonSetStyle(&g_info_window, offset,
+                BTN_STYLE_2D | BTN_STYLE_NO_BORDERS);
+
+        buttons[offset].align = ALIGN_CENTER_LEFT;
+
+        UG_ButtonSetBackColor(&g_info_window, offset, 0);
+        UG_ButtonSetHSpace(&g_info_window, offset, 8);
+        switch (i) {
+			case 0:
+				UG_ButtonSetText(&g_info_window, offset, g_version);
+				break;
+			default:
+				break;
+        }
+    }
+}
+
 void windows_create(void)
 {
     home_window_create();
@@ -931,6 +1018,7 @@ void windows_create(void)
     sensor_list_window_create();
     actuator_list_window_create();
     settings_window_create();
+    info_window_create();
 
     input_window_create();
     keyboard_window_create();
