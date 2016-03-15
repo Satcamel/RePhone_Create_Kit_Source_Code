@@ -1,0 +1,2 @@
+[autostart]
+App=C:\MRE\RePhone_Create_Source_Code_default.vxp
