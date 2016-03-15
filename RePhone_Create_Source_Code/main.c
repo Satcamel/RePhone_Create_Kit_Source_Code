@@ -43,6 +43,7 @@ static VMUINT8* g_font_pool;
 VMUINT8 sys_record_time = 0;
 unsigned char sys_blink = 0;
 char* g_version	= "screen.0.1";
+
 extern void gui_setup(void);
 extern void windows_create(void);
 extern void handle_touchevt(VM_TOUCH_EVENT event, VMINT x, VMINT y);
