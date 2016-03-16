@@ -206,7 +206,7 @@ static void home_window_create(void)
     UG_ButtonSetFont(&g_home_window, index, &FONT_SIZE20);
     UG_ButtonSetStyle(&g_home_window, index,
             BTN_STYLE_2D | BTN_STYLE_NO_BORDERS);
-    UG_ButtonSetBackColor(&g_home_window, index, C_PINK);
+    UG_ButtonSetBackColor(&g_home_window, index, 0);
 
     if (!vm_gsm_sim_has_card()) {
         UG_ButtonSetText(&g_home_window, index, "no sim");
@@ -260,7 +260,7 @@ static void home2_window_create(void)
 {
     static UG_BUTTON buttons[11];
     static UG_OBJECT objects[11];
-    uint32_t colors[] = {C_BLACK, 0x00865a, C_SKY_BLUE, C_BLACK, C_BLACK, C_BLACK};
+    uint32_t colors[] = {C_BLACK, 0x00865a, C_SKY_BLUE, C_PURPLE, C_BLACK, C_BLACK};
     int i, j;
     int index;
 
@@ -332,7 +332,7 @@ static void home2_window_create(void)
     UG_ButtonSetFont(&g_home2_window, index, &FONT_SIZE20);
     UG_ButtonSetStyle(&g_home2_window, index,
             BTN_STYLE_2D | BTN_STYLE_NO_BORDERS);
-    UG_ButtonSetBackColor(&g_home2_window, index, C_PINK);
+    UG_ButtonSetBackColor(&g_home2_window, index, C_BLACK);
 
     if (!vm_gsm_sim_has_card()) {
         UG_ButtonSetText(&g_home2_window, index, "no sim");
